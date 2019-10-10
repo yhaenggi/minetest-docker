@@ -4,11 +4,11 @@ ARCHES="$(cat ARCHES)"
 REGISTRY="$(cat REGISTRY)"
 
 for arch in $ARCHES; do
-	docker build -t ${REGISTRY}minetest-${arch}:${MINETEST_VERSION} --build-arg MINETEST_VERSION=${MINETEST_VERSION} --build-arg OPENGFX_VERSION=${OPENGFX_VERSION} --build-arg ARCH=${arch} .
+	docker build -t ${REGISTRY}minetest-${arch}:${MINETEST_VERSION} --build-arg MINETEST_VERSION=${MINETEST_VERSION} --build-arg ARCH=${arch} .
 done
 
 for arch in $ARCHES; do
-	docker push -t ${REGISTRY}minetest-${arch}:${MINETEST_VERSION}
+	docker push ${REGISTRY}minetest-${arch}:${MINETEST_VERSION}
 done
 
 manifests=""
