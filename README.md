@@ -2,7 +2,7 @@ These images have been built and tested on docker i386, amd64, arm32v7 and arm64
 
 ## Usage ##
 
-    docker run -d -p 30000:30000:/udp yhaenggi/minetest:1.7.3
+    docker run -d -p 30000:30000/udp yhaenggi/minetest:5.1.1
 Extra arguments go to minetest server directly.
 
 ## Build ##
