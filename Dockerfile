@@ -1,10 +1,10 @@
 ARG ARCH
 FROM ${ARCH}/ubuntu:bionic
-MAINTAINER yhaenggi <yhaenggi@darkgamex.ch>
+MAINTAINER yhaenggi <yhaenggi-git-public@darkgamex.ch>
 
 ARG ARCH
-ARG MINETEST_VERSION
-ENV MINETEST_VERSION=${MINETEST_VERSION}
+ARG VERSION
+ENV VERSION=${VERSION}
 ENV ARCH=${ARCH}
 
 COPY ./qemu-x86_64-static /usr/bin/qemu-x86_64-static
@@ -35,7 +35,7 @@ RUN apt-get install git debhelper fakeroot devscripts -y
 RUN apt-get install build-essential libirrlicht-dev cmake libbz2-dev libpng-dev libjpeg-dev libsqlite3-dev libcurl4-gnutls-dev zlib1g-dev libgmp-dev libjsoncpp-dev luajit libgmp-dev libluajit-5.1-dev libleveldb-dev libhiredis-dev libspatialindex-dev libpq-dev libpq-dev postgresql-server-dev-all -y
 
 WORKDIR /tmp/
-RUN git clone --depth 1 --branch ${MINETEST_VERSION} https://github.com/minetest/minetest.git minetest
+RUN git clone --depth 1 --branch ${VERSION} https://github.com/minetest/minetest.git minetest
 WORKDIR /tmp/minetest/
 
 RUN mkdir -p /tmp/minetest/cmakebuild
@@ -44,7 +44,7 @@ RUN cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release -DRUN_IN_
 RUN bash -c "nice -n 20 make -j$(nproc)"
 
 WORKDIR /tmp/minetest/games/
-RUN git clone --depth 1 --branch ${MINETEST_VERSION} https://github.com/minetest/minetest_game.git minetest_game
+RUN git clone --depth 1 --branch ${VERSION} https://github.com/minetest/minetest_game.git minetest_game
 
 WORKDIR /tmp/minetest/cmakebuild/
 RUN make install
@@ -53,31 +53,23 @@ RUN rm /usr/bin/qemu-x86_64-static /usr/bin/qemu-arm-static /usr/bin/qemu-aarch6
 
 FROM ${ARCH}/ubuntu:bionic
 
+COPY ./qemu-i386-static /usr/bin/qemu-i386-static
 COPY ./qemu-x86_64-static /usr/bin/qemu-x86_64-static
 COPY ./qemu-arm-static /usr/bin/qemu-arm-static
 COPY ./qemu-aarch64-static /usr/bin/qemu-aarch64-static
 
 WORKDIR /root/
 
-RUN apt-get update
 # set noninteractive installation
 ENV DEBIAN_FRONTEND=noninteractive
-#install tzdata package
-RUN apt-get install tzdata -y
+
+# netcat is used for liveness/readiness probes
+# also game dependencies
+RUN apt-get update && apt-get install tzdata libcurl3-gnutls libjsoncpp1 liblua5.1-0 libluajit-5.1-2 libpq5 libsqlite3-0 libstdc++6 zlib1g libc6 libleveldb1v5 libspatialindex-c4v5 libhiredis0.13 -y && apt-get clean && rm -R /var/cache/apt && rm -R /var/lib/apt/lists
+
 # set your timezone
 RUN ln -fs /usr/share/zoneinfo/Europe/Zurich /etc/localtime
 RUN dpkg-reconfigure --frontend noninteractive tzdata
-
-RUN apt-get install software-properties-common -y
-RUN add-apt-repository universe
-RUN add-apt-repository multiverse
-RUN apt-get update
-
-# used for liveness/readiness probes
-RUN apt-get install netcat -y
-
-#game dependencies
-RUN apt-get install libcurl3-gnutls libjsoncpp1 liblua5.1-0 libluajit-5.1-2 libpq5 libsqlite3-0 libstdc++6 zlib1g libc6 libleveldb1v5 libspatialindex-c4v5 libhiredis0.13 -y
 
 RUN mkdir -p /home/minetest/.minetest
 RUN useradd -M -d /home/minetest -u 911 -U -s /bin/bash minetest
@@ -88,11 +80,7 @@ COPY --from=0 /usr/local/share/minetest /usr/local/share/minetest
 COPY --from=0 /usr/local/bin/minetestserver /usr/local/bin/minetestserver
 COPY --from=0 /usr/local/share/doc/minetest/minetest.conf.example /etc/minetest/minetest.conf
 
-RUN apt-get clean
-RUN rm -Rf /var/lib/apt/lists
-RUN rm -Rf /var/cache/apt
-
-RUN rm /usr/bin/qemu-x86_64-static /usr/bin/qemu-arm-static /usr/bin/qemu-aarch64-static
+RUN rm /usr/bin/qemu-i386-static /usr/bin/qemu-x86_64-static /usr/bin/qemu-arm-static /usr/bin/qemu-aarch64-static
 
 USER minetest
 WORKDIR /home/minetest
