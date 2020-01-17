@@ -1,20 +1,21 @@
 #!/bin/bash
-MINETEST_VERSION="$(cat MINETEST_VERSION)"
+VERSION="$(cat VERSION)"
 ARCHES="$(cat ARCHES)"
 REGISTRY="$(cat REGISTRY)"
+IMAGE="$(cat IMAGE)"
 
 for arch in $ARCHES; do
-	docker build -t ${REGISTRY}minetest-${arch}:${MINETEST_VERSION} --build-arg MINETEST_VERSION=${MINETEST_VERSION} --build-arg ARCH=${arch} .
+	docker build -t ${REGISTRY}${IMAGE}-${arch}:${VERSION} --build-arg VERSION=${VERSION} --build-arg IMAGE=${IMAGE} --build-arg ARCH=${arch} .
 done
 
 for arch in $ARCHES; do
-	docker push ${REGISTRY}minetest-${arch}:${MINETEST_VERSION}
+	docker push ${REGISTRY}${IMAGE}-${arch}:${VERSION}
 done
 
 manifests=""
 for arch in $ARCHES; do
-	manifests+="${REGISTRY}minetest-${arch}:${MINETEST_VERSION} "
+	manifests+="${REGISTRY}${IMAGE}-${arch}:${VERSION} "
 done
 
-docker manifest create ${REGISTRY}minetest:${MINETEST_VERSION} $manifests
-docker manifest push --purge ${REGISTRY}minetest:${MINETEST_VERSION}
+docker manifest create ${REGISTRY}${IMAGE}:${VERSION} $manifests
+docker manifest push --purge ${REGISTRY}${IMAGE}:${VERSION}
