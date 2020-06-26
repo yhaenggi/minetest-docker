@@ -65,7 +65,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # netcat is used for liveness/readiness probes
 # also game dependencies
-RUN apt-get update && apt-get install tzdata libcurl3-gnutls libjsoncpp1 liblua5.1-0 libluajit-5.1-2 libpq5 libsqlite3-0 libstdc++6 zlib1g libc6 libleveldb1v5 libspatialindex-c4v5 libhiredis0.13 -y && apt-get clean && rm -R /var/cache/apt && rm -R /var/lib/apt/lists
+RUN apt-get update && apt-get install tzdata libcurl3-gnutls libjsoncpp1 liblua5.1-0 libluajit-5.1-2 libpq5 libsqlite3-0 libstdc++6 zlib1g libc6 libleveldb1v5 libspatialindex-c4v5 libhiredis0.13 netcat-openbsd -y && apt-get clean && rm -R /var/cache/apt && rm -R /var/lib/apt/lists
 
 # set your timezone
 RUN ln -fs /usr/share/zoneinfo/Europe/Zurich /etc/localtime
