@@ -2,7 +2,7 @@ These images have been built and tested on docker i386, amd64, arm32v7 and arm64
 
 ## Usage ##
 
-    docker run -d -p 30000:30000/udp yhaenggi/minetest:5.2.0
+    docker run -d -p 30000:30000/udp yhaenggi/minetest:5.3.0
 Extra arguments go to minetest server directly.
 
 ## Build ##
@@ -22,6 +22,7 @@ You can verify if it worked with this (should show enabled):
     update-binfmts --display|grep -E "arm|aarch"
 
 ## Tags ##
+   * 5.3.0
    * 5.2.0
    * 5.1.1
    * 5.1.0
