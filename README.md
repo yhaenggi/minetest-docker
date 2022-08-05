@@ -19,6 +19,8 @@ You can verify binfmt support for multiarch builds with (should show enabled):
 
 ## Tags ##
    * 5.6.0
+   * 5.4.1
+   * 5.4.0
    * 5.3.0
    * 5.2.0
    * 5.1.1
