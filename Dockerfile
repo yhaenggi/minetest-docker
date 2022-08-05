@@ -7,9 +7,11 @@ ARG VERSION
 ENV VERSION=${VERSION}
 ENV ARCH=${ARCH}
 
-COPY ./qemu-x86_64-static /usr/bin/qemu-x86_64-static
-COPY ./qemu-arm-static /usr/bin/qemu-arm-static
-COPY ./qemu-aarch64-static /usr/bin/qemu-aarch64-static
+ARG VERSION_IRRLICHTMT
+ENV VERSION_IRRLICHTMT=${VERSION_IRRLICHTMT}
+
+COPY ./qemu-arm-static /usr/bin/qemu-arm
+COPY ./qemu-aarch64-static /usr/bin/qemu-aarch64
 
 RUN echo force-unsafe-io | tee /etc/dpkg/dpkg.cfg.d/docker-apt-speedup
 RUN apt-get update
@@ -36,11 +38,13 @@ RUN apt-get install build-essential libirrlicht-dev cmake libbz2-dev libpng-dev 
 
 WORKDIR /tmp/
 RUN git clone --depth 1 --branch ${VERSION} https://github.com/minetest/minetest.git minetest
+RUN git clone --depth=1 --branch ${VERSION_IRRLICHTMT} https://github.com/minetest/irrlicht.git irrlichtmt
+
 WORKDIR /tmp/minetest/
 
 RUN mkdir -p /tmp/minetest/cmakebuild
 WORKDIR /tmp/minetest/cmakebuild/
-RUN cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release -DRUN_IN_PLACE=FALSE -DBUILD_SERVER=TRUE -DBUILD_CLIENT=FALSE -DENABLE_SYSTEM_JSONCPP=1 -DENABLE_LEVELDB=ON -DENABLE_POSTGRESQL=ON -DENABLE_REDIS=ON -DENABLE_SPATIAL=ON -DENABLE_LUAJIT=ON -DENABLE_SYSTEM_GMP=ON -DENABLE_CURL=ON -DENABLE_SYSTEM_JSONCPP=ON -DENABLE_SOUND=OFF -DPostgreSQL_INCLUDE_DIR=/usr/include/postgresql/ ..
+RUN cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release -DRUN_IN_PLACE=FALSE -DBUILD_SERVER=TRUE -DBUILD_CLIENT=FALSE -BUILD_UNITTESTS=FALSE -DENABLE_SYSTEM_JSONCPP=1 -DENABLE_LEVELDB=ON -DENABLE_POSTGRESQL=ON -DENABLE_REDIS=ON -DENABLE_SPATIAL=ON -DENABLE_LUAJIT=ON -DENABLE_SYSTEM_GMP=ON -DENABLE_CURL=ON -DENABLE_SYSTEM_JSONCPP=ON -DENABLE_SOUND=OFF -DPostgreSQL_INCLUDE_DIR=/usr/include/postgresql/ -DIRRLICHT_INCLUDE_DIR=/tmp/irrlichtmt/include ..
 RUN bash -c "nice -n 20 make -j$(nproc)"
 
 WORKDIR /tmp/minetest/games/
@@ -49,14 +53,12 @@ RUN git clone --depth 1 --branch ${VERSION} https://github.com/minetest/minetest
 WORKDIR /tmp/minetest/cmakebuild/
 RUN make install
 
-RUN rm /usr/bin/qemu-x86_64-static /usr/bin/qemu-arm-static /usr/bin/qemu-aarch64-static
+RUN rm /usr/bin/qemu-*
 
 FROM ${ARCH}/ubuntu:bionic
 
-COPY ./qemu-i386-static /usr/bin/qemu-i386-static
-COPY ./qemu-x86_64-static /usr/bin/qemu-x86_64-static
-COPY ./qemu-arm-static /usr/bin/qemu-arm-static
-COPY ./qemu-aarch64-static /usr/bin/qemu-aarch64-static
+COPY ./qemu-arm-static /usr/bin/qemu-arm
+COPY ./qemu-aarch64-static /usr/bin/qemu-aarch64
 
 WORKDIR /root/
 
@@ -80,7 +82,7 @@ COPY --from=0 /usr/local/share/minetest /usr/local/share/minetest
 COPY --from=0 /usr/local/bin/minetestserver /usr/local/bin/minetestserver
 COPY --from=0 /usr/local/share/doc/minetest/minetest.conf.example /etc/minetest/minetest.conf
 
-RUN rm /usr/bin/qemu-i386-static /usr/bin/qemu-x86_64-static /usr/bin/qemu-arm-static /usr/bin/qemu-aarch64-static
+RUN rm /usr/bin/qemu-*
 
 USER minetest
 WORKDIR /home/minetest
