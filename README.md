@@ -2,7 +2,7 @@ These images have been built and tested on docker i386, amd64, arm32v7 and arm64
 
 ## Usage ##
 
-    docker run -d -p 30000:30000/udp yhaenggi/minetest:5.6.0
+    docker run -d -p 30000:30000/udp yhaenggi/minetest:5.6.1
 Extra arguments go to minetest server directly.
 
 ## Build ##
@@ -18,6 +18,7 @@ You can verify binfmt support for multiarch builds with (should show enabled):
     grep -E "arm|aarch" -A1 -R /proc/sys/fs/binfmt_misc/
 
 ## Tags ##
+   * 5.6.1
    * 5.6.0
    * 5.4.1
    * 5.4.0
