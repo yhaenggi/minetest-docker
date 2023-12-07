@@ -1,6 +1,7 @@
 #!/bin/bash
 VERSION="$(cat VERSION)"
 VERSION_IRRLICHTMT="$(cat VERSION_IRRLICHTMT)"
+VERSION_GAME="$(cat VERSION_GAME)"
 ARCHES="$(cat ARCHES)"
 REGISTRY="$(cat REGISTRY)"
 IMAGE="$(cat IMAGE)"
@@ -8,7 +9,7 @@ IMAGE="$(cat IMAGE)"
 set -e
 
 for arch in $ARCHES; do
-	docker build -t ${REGISTRY}${IMAGE}-${arch}:${VERSION} --build-arg VERSION=${VERSION} --build-arg VERSION_IRRLICHTMT=${VERSION_IRRLICHTMT} --build-arg IMAGE=${IMAGE} --build-arg ARCH=${arch} .
+	docker build -t ${REGISTRY}${IMAGE}-${arch}:${VERSION} --build-arg VERSION=${VERSION} --build-arg VERSION_IRRLICHTMT=${VERSION_IRRLICHTMT} --build-arg VERSION_GAME=${VERSION_GAME} --build-arg IMAGE=${IMAGE} --build-arg ARCH=${arch} .
 done
 
 for arch in $ARCHES; do

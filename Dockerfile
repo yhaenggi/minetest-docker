@@ -47,8 +47,11 @@ WORKDIR /tmp/minetest/cmakebuild/
 RUN cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release -DRUN_IN_PLACE=FALSE -DBUILD_SERVER=TRUE -DBUILD_CLIENT=FALSE -BUILD_UNITTESTS=FALSE -DENABLE_SYSTEM_JSONCPP=1 -DENABLE_LEVELDB=ON -DENABLE_POSTGRESQL=ON -DENABLE_REDIS=ON -DENABLE_SPATIAL=ON -DENABLE_LUAJIT=ON -DENABLE_SYSTEM_GMP=ON -DENABLE_CURL=ON -DENABLE_SYSTEM_JSONCPP=ON -DENABLE_SOUND=OFF -DPostgreSQL_INCLUDE_DIR=/usr/include/postgresql/ -DIRRLICHT_INCLUDE_DIR=/tmp/irrlichtmt/include ..
 RUN bash -c "nice -n 20 make -j$(nproc)"
 
+ARG VERSION_GAME
+ENV VERSION_GAME=${VERSION_GAME}
+
 WORKDIR /tmp/minetest/games/
-RUN git clone --depth 1 --branch ${VERSION} https://github.com/minetest/minetest_game.git minetest_game
+RUN git clone --depth 1 --branch ${VERSION_GAME} https://github.com/minetest/minetest_game.git minetest_game
 
 WORKDIR /tmp/minetest/cmakebuild/
 RUN make install
@@ -79,6 +82,7 @@ RUN usermod -G users minetest
 RUN chown minetest:minetest /home/minetest -R
 
 COPY --from=0 /usr/local/share/minetest /usr/local/share/minetest
+COPY --from=0 /tmp/minetest/games/minetest_game /usr/local/share/minetest/games/minetest_game
 COPY --from=0 /usr/local/bin/minetestserver /usr/local/bin/minetestserver
 COPY --from=0 /usr/local/share/doc/minetest/minetest.conf.example /etc/minetest/minetest.conf
 
@@ -90,4 +94,4 @@ WORKDIR /home/minetest
 EXPOSE 30000/udp
 
 ENTRYPOINT ["/usr/local/bin/minetestserver"]
-CMD ["--config", "/etc/minetest/minetest.conf"]
+CMD ["--config", "/etc/minetest/minetest.conf", "--gameid", "minetest"]
